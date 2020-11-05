@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/MuseApp/static/css/main.ea4cb33d.chunk.css",
-    "main.js": "/MuseApp/static/js/main.88bb2d59.chunk.js",
-    "main.js.map": "/MuseApp/static/js/main.88bb2d59.chunk.js.map",
+    "main.js": "/MuseApp/static/js/main.9ce80971.chunk.js",
+    "main.js.map": "/MuseApp/static/js/main.9ce80971.chunk.js.map",
     "runtime-main.js": "/MuseApp/static/js/runtime-main.d9d7b862.js",
     "runtime-main.js.map": "/MuseApp/static/js/runtime-main.d9d7b862.js.map",
     "static/js/2.600ede0a.chunk.js": "/MuseApp/static/js/2.600ede0a.chunk.js",
@@ -18,6 +18,6 @@
     "static/js/runtime-main.d9d7b862.js",
     "static/js/2.600ede0a.chunk.js",
     "static/css/main.ea4cb33d.chunk.css",
-    "static/js/main.88bb2d59.chunk.js"
+    "static/js/main.9ce80971.chunk.js"
   ]
 }
