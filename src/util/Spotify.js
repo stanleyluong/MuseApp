@@ -1,4 +1,4 @@
-let accessToken, clientID = 'c52ced1d33f34b66aea1905a4afe30d0',redirectURI='http://localhost:3000'
+let accessToken, clientID = 'c52ced1d33f34b66aea1905a4afe30d0',redirectURI='http://stanleyluong.github.io/MuseApp'
 
 const Spotify = {
     getAccessToken(){
