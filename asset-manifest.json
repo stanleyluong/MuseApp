@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/MuseApp/static/css/main.ea4cb33d.chunk.css",
+    "main.js": "/MuseApp/static/js/main.88bb2d59.chunk.js",
+    "main.js.map": "/MuseApp/static/js/main.88bb2d59.chunk.js.map",
+    "runtime-main.js": "/MuseApp/static/js/runtime-main.d9d7b862.js",
+    "runtime-main.js.map": "/MuseApp/static/js/runtime-main.d9d7b862.js.map",
+    "static/js/2.600ede0a.chunk.js": "/MuseApp/static/js/2.600ede0a.chunk.js",
+    "static/js/2.600ede0a.chunk.js.map": "/MuseApp/static/js/2.600ede0a.chunk.js.map",
+    "static/js/3.6a3c7a85.chunk.js": "/MuseApp/static/js/3.6a3c7a85.chunk.js",
+    "static/js/3.6a3c7a85.chunk.js.map": "/MuseApp/static/js/3.6a3c7a85.chunk.js.map",
+    "index.html": "/MuseApp/index.html",
+    "static/css/main.ea4cb33d.chunk.css.map": "/MuseApp/static/css/main.ea4cb33d.chunk.css.map",
+    "static/js/2.600ede0a.chunk.js.LICENSE.txt": "/MuseApp/static/js/2.600ede0a.chunk.js.LICENSE.txt",
+    "static/media/App.css": "/MuseApp/static/media/background_photo_desktop.fe3a0bed.webp"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d9d7b862.js",
+    "static/js/2.600ede0a.chunk.js",
+    "static/css/main.ea4cb33d.chunk.css",
+    "static/js/main.88bb2d59.chunk.js"
+  ]
+}
