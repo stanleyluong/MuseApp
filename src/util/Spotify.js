@@ -1,4 +1,9 @@
-let accessToken, clientID = 'c52ced1d33f34b66aea1905a4afe30d0',redirectURI='http://stanleyluong.github.io/MuseApp'
+const clientID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+let accessToken;
+let redirectURI =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000/"
+    : "https://museapp.stanleyluong.com/";
 
 const Spotify = {
     getAccessToken(){
