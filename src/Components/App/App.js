@@ -41,7 +41,7 @@ function NavBar({ onLogout, onLogin, isAuthenticated }) {
           </Button>
         ) : (
           <Button onClick={onLogin} size="sm" colorScheme="teal" mx={2}>
-            Login
+            Sign In
           </Button>
         )}
         <IconButton
@@ -60,6 +60,10 @@ function MainApp(props) {
   const cardBg = useColorModeValue('whiteAlpha.800', 'whiteAlpha.200');
   const sidebarBg = useColorModeValue('whiteAlpha.900', 'gray.800');
   const borderCol = useColorModeValue('gray.200', 'gray.700');
+  const inputBg = useColorModeValue('white', 'gray.700');
+  const inputColor = useColorModeValue('gray.800', 'white');
+  const inputFocusBg = useColorModeValue('gray.100', 'gray.600');
+  const infoBg = useColorModeValue('teal.50', 'gray.700');
   const [editingPlaylist, setEditingPlaylist] = useState(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [isNew, setIsNew] = useState(false);
@@ -118,7 +122,15 @@ function MainApp(props) {
       <Box w={{ base: 'full', md: 72 }} bg={sidebarBg} p={4} boxShadow="2xl" minH="100vh">
         <Flex direction="column" h="full">
           <Heading as="h2" size="md" color="teal.500" mb={4}>My Playlists</Heading>
-          <Button colorScheme="teal" mb={4} onClick={handleAddPlaylist} isFullWidth leftIcon={<AddIcon />}>Add Playlist</Button>
+          {!props.isAuthenticated ? (
+            <Button colorScheme="teal" mb={4} w="full" leftIcon={<AddIcon />} onClick={props.onLogin} fontSize="sm" py={5}>
+              Sign in to manage playlists
+            </Button>
+          ) : (
+            <Button colorScheme="teal" mb={4} onClick={handleAddPlaylist} w="full" leftIcon={<AddIcon />}>
+              Add Playlist
+            </Button>
+          )}
           <VStack align="stretch" spacing={2} flex={1} overflowY="auto">
             {props.loadingPlaylists ? (
               <Spinner size="lg" />
@@ -132,7 +144,7 @@ function MainApp(props) {
                 </Button>
               ))
             ) : (
-              <Text color="gray.400">No playlists found.</Text>
+              <Text color="gray.700">No playlists found.</Text>
             )}
           </VStack>
         </Flex>
@@ -140,18 +152,42 @@ function MainApp(props) {
       {/* Center: Search and Results */}
       <Box flex={2} p={8} minW={0}>
         <VStack spacing={4} w="100%" maxW="2xl" mx="auto" bg={cardBg} p={8} borderRadius="xl" boxShadow="2xl" mb={8}>
-          <Input
-            placeholder="Enter a Song, Album, or Artist"
-            size="lg"
-            variant="filled"
-            bg={useColorModeValue('white', 'gray.700')}
-            color={useColorModeValue('gray.800', 'white')}
-            _focus={{ bg: useColorModeValue('gray.100', 'gray.600') }}
-            onChange={e => props.onSearch(e.target.value, e)}
-          />
-          <Button colorScheme="teal" size="lg" w="full" onClick={e => props.onSearch(props.term, e)}>
-            Search
-          </Button>
+          {!props.isAuthenticated && (
+            <Box mb={4} p={4} bg={infoBg} borderRadius="md" boxShadow="sm" w="full">
+              <Text fontSize="xl" fontWeight="bold" color="teal.600" mb={2} textAlign="center" fontFamily="'Poppins', 'Work Sans', sans-serif">
+                Welcome to MuseApp!
+              </Text>
+              <Text color="gray.800" textAlign="center" fontFamily="'Poppins', 'Work Sans', sans-serif">
+                MuseApp lets you search for songs, create and manage Spotify playlists, and save them directly to your Spotify account.<br/>
+                Sign in with Spotify to get started!
+              </Text>
+            </Box>
+          )}
+          {!props.isAuthenticated ? (
+            <>
+              <Button colorScheme="teal" size="lg" w="full" onClick={props.onLogin}>
+                Sign in with Spotify to search
+              </Button>
+              <Text color="gray.700" mt={2} textAlign="center">
+                You must sign in to search for songs, albums, or artists.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Input
+                placeholder="Enter a Song, Album, or Artist"
+                size="lg"
+                variant="filled"
+                bg={inputBg}
+                color={inputColor}
+                _focus={{ bg: inputFocusBg }}
+                onChange={e => props.onSearch(e.target.value, e)}
+              />
+              <Button colorScheme="teal" size="lg" w="full" onClick={e => props.onSearch(props.term, e)}>
+                Search
+              </Button>
+            </>
+          )}
         </VStack>
         <Box maxW="2xl" mx="auto" pb={12}>
           <SearchResults onAdd={handleAddTrack} searchResults={props.searchResults} tableId="search-results-table"/>
@@ -333,7 +369,12 @@ function App() {
   }, [handleWindowScroll]);
 
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <Favicon />
       <NavBar onLogout={handleLogout} onLogin={() => Spotify.getAccessToken(true)} isAuthenticated={isAuthenticated} />
       <Routes>
@@ -357,6 +398,7 @@ function App() {
             setPlaylistTracksDirectly={setPlaylistTracksDirectly}
             isLoadingMore={isLoadingMore}
             hasMoreResults={hasMoreResults}
+            onLogin={() => Spotify.getAccessToken(true)}
           />
         } />
       </Routes>
