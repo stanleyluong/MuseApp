@@ -7,7 +7,7 @@ import './Playlist.css';
 
 function Playlist(props) {
     const cardBg = useColorModeValue('whiteAlpha.900', 'gray.700');
-    const [loadingTracks, setLoadingTracks] = useState(false);
+    const [playlistName, setPlaylistName] = useState(props.playlistName);
     const [originalPlaylist, setOriginalPlaylist] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const cancelRef = useRef();
@@ -34,10 +34,10 @@ function Playlist(props) {
         }
         setNewCoverFile(null);
         setNewCoverPreview(null);
-    }, [editingPlaylist, isNew]);
+    }, [editingPlaylist, isNew, props.playlistTracks]);
 
     const handleNameChange = (e) => {
-        props.onNameChange(e.target.value);
+        setPlaylistName(e.target.value);
     };
 
     const handleImageChange = (e) => {
@@ -57,7 +57,7 @@ function Playlist(props) {
         try {
             const uris = props.playlistTracks.map(track => track.uri);
             if (editingPlaylist) {
-                await Spotify.updatePlaylist(editingPlaylist.id, props.playlistName, uris);
+                await Spotify.updatePlaylist(editingPlaylist.id, playlistName, uris);
                 let coverJustUpdated = false;
                 // Upload new cover image if selected
                 if (newCoverFile && newCoverPreview) {
@@ -86,7 +86,7 @@ function Playlist(props) {
                 if (props.userPlaylists && props.refreshPlaylists) {
                     const updated = props.userPlaylists.map(pl => {
                         if (pl.id === editingPlaylist.id) {
-                            const updatedPl = { ...pl, name: props.playlistName, tracks: { ...pl.tracks, total: props.playlistTracks.length } };
+                            const updatedPl = { ...pl, name: playlistName, tracks: { ...pl.tracks, total: props.playlistTracks.length } };
                             if (coverJustUpdated && newCoverPreview) {
                                 updatedPl.images = [{ url: newCoverPreview }];
                             }
@@ -110,7 +110,7 @@ function Playlist(props) {
                 props.onSave(newCoverPreview);
                 if (props.refreshPlaylists) props.refreshPlaylists();
                 toast({
-                    title: `Your playlist ${props.playlistName} has been saved to Spotify!`,
+                    title: `Your playlist ${playlistName} has been saved to Spotify!`,
                     status: 'success',
                     duration: 3000,
                     isClosable: true,
@@ -138,7 +138,7 @@ function Playlist(props) {
 
     function hasUnsavedChanges() {
         if (!originalPlaylist) return false;
-        if (props.playlistName !== originalPlaylist.name) return true;
+        if (playlistName !== originalPlaylist.name) return true;
         const currentUris = props.playlistTracks.map(t => t.uri);
         return JSON.stringify(currentUris) !== JSON.stringify(originalPlaylist.tracks);
     }
@@ -180,7 +180,7 @@ function Playlist(props) {
                     <input type="file" accept="image/jpeg,image/png" style={{ display: 'block', marginBottom: 8 }} onChange={handleImageChange} disabled={isSaving} />
                     <Text fontSize="xs" color="gray.400">Upload a new cover image (JPEG, &lt;256KB)</Text>
                 </Box>
-                <Input id="playlistnameinput" onChange={handleNameChange} placeholder="Enter Playlist Name" value={props.playlistName} mb={2} disabled={isSaving}/>
+                <Input id="playlistnameinput" onChange={handleNameChange} placeholder="Enter Playlist Name" value={playlistName} mb={2} disabled={isSaving}/>
                 <TrackList onRemove={props.onRemove} isRemoval={true} tracks={props.playlistTracks}/>
                 <HStack mt={4}>
                     <Button colorScheme="gray" variant="outline" onClick={handleCancel} disabled={isSaving}>Cancel</Button>

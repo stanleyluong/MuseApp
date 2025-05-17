@@ -18,6 +18,7 @@ import Playlist from '../../Components/Playlist/Playlist.js';
 import SearchResults from '../../Components/SearchResults/SearchResults.js';
 import Spotify from '../../util/Spotify.js';
 import About from '../About';
+import Favicon from '../Favicon';
 
 function NavBar({ onLogout, onLogin, isAuthenticated }) {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -25,9 +26,12 @@ function NavBar({ onLogout, onLogin, isAuthenticated }) {
   const navText = useColorModeValue('teal.600', 'teal.200');
   return (
     <Flex as="header" align="center" p={4} boxShadow="md" bg={navBg} position="sticky" top="0" zIndex="10">
-      <Heading as="h1" size="lg" color="teal.500" letterSpacing="wide">
-        MuseApp
-      </Heading>
+      <Flex align="center">
+        <Text fontSize="2xl" color="teal.500" mr={2}>♪</Text>
+        <Heading as="h1" size="lg" color="teal.500" letterSpacing="wide">
+          MuseApp
+        </Heading>
+      </Flex>
       <Flex ml="auto" align="center">
         <Link as={RouterLink} to="/" fontWeight="bold" mx={2} color={navText}>Home</Link>
         <Link as={RouterLink} to="/about" fontWeight="bold" mx={2} color={navText}>About</Link>
@@ -149,8 +153,15 @@ function MainApp(props) {
             Search
           </Button>
         </VStack>
-        <Box maxW="2xl" mx="auto">
-          <SearchResults onAdd={handleAddTrack} searchResults={props.searchResults}/>
+        <Box maxW="2xl" mx="auto" pb={12}>
+          <SearchResults onAdd={handleAddTrack} searchResults={props.searchResults} tableId="search-results-table"/>
+          {props.isLoadingMore && <Spinner size="md" color="teal.500" mt={4} />}
+          {props.searchResults.length > 0 && props.hasMoreResults && !props.isLoadingMore ? (
+            <Text color="gray.400" textAlign="center" mt={2} mb={2} fontStyle="italic">Scroll for more results...</Text>
+          ) : null}
+          {!props.hasMoreResults && !props.isLoadingMore && (
+            <Text color="gray.400" textAlign="center" mt={4} mb={8} fontStyle="italic">End of results</Text>
+          )}
         </Box>
       </Box>
       {/* Right: Playlist Editor */}
@@ -186,6 +197,9 @@ function App() {
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
   const [term, setTerm] = useState('');
+  const [searchOffset, setSearchOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreResults, setHasMoreResults] = useState(true);
   const toast = useToast();
 
   const setPlaylistTracksDirectly = (tracks) => setPlaylistTracks(tracks);
@@ -273,43 +287,80 @@ function App() {
   const search = async (term, e) => {
     if (e) e.preventDefault();
     setTerm(term);
-    const results = await Spotify.search(term);
+    setSearchOffset(0);
+    setHasMoreResults(true);
+    setIsLoadingMore(false);
+    const results = await Spotify.search(term, 0);
     setSearchResults(results);
+    setSearchOffset(results.length);
+    setHasMoreResults(results.length === 20);
   };
   const handleLogout = () => {
     localStorage.removeItem('spotify_access_token');
     window.location.reload();
   };
 
+  // Infinite scroll handler for window
+  const handleWindowScroll = useCallback(async () => {
+    if (!hasMoreResults || isLoadingMore) return;
+    const table = document.getElementById('search-results-table');
+    if (!table) return;
+    const rect = table.getBoundingClientRect();
+    if (rect.bottom - 100 <= window.innerHeight) {
+      setIsLoadingMore(true);
+      const moreResults = await Spotify.search(term, searchOffset);
+      setSearchOffset(prev => prev + moreResults.length);
+      setIsLoadingMore(false);
+      setSearchResults(prev => {
+        const prevIds = new Set(prev.map(t => t.id));
+        const uniqueNew = moreResults.filter(t => !prevIds.has(t.id));
+        if (uniqueNew.length === 0) {
+          setHasMoreResults(false);
+          return prev;
+        }
+        if (uniqueNew.length < 20) setHasMoreResults(false);
+        return [...prev, ...uniqueNew];
+      });
+    }
+  }, [term, searchOffset, isLoadingMore, hasMoreResults]);
+
+  // Attach scroll listeners
+  useEffect(() => {
+    window.addEventListener('scroll', handleWindowScroll);
+    return () => {
+      window.removeEventListener('scroll', handleWindowScroll);
+    };
+  }, [handleWindowScroll]);
+
   return (
-    <>
-      <Router>
-        <NavBar onLogout={handleLogout} onLogin={() => Spotify.getAccessToken(true)} isAuthenticated={isAuthenticated} />
-        <Routes>
-          <Route path="/" element={<MainApp
+    <Router>
+      <Favicon />
+      <NavBar onLogout={handleLogout} onLogin={() => Spotify.getAccessToken(true)} isAuthenticated={isAuthenticated} />
+      <Routes>
+        <Route path="/about" element={<About />} />
+        <Route path="/" element={
+          <MainApp
+            searchResults={searchResults}
+            playlistTracks={playlistTracks}
+            playlistName={playlistName}
             onSearch={search}
             onAdd={addTrack}
-            searchResults={searchResults}
-            onSave={savePlaylist}
-            onNameChange={updatePlaylistName}
             onRemove={removeTrack}
+            onNameChange={updatePlaylistName}
             onClear={clearPlaylist}
-            playlistName={playlistName}
-            playlistTracks={playlistTracks}
+            onSave={savePlaylist}
             userPlaylists={userPlaylists}
             loadingPlaylists={loadingPlaylists}
             refreshPlaylists={refreshPlaylists}
-            term={term}
             isAuthenticated={isAuthenticated}
+            term={term}
             setPlaylistTracksDirectly={setPlaylistTracksDirectly}
-          />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
-      </Router>
-      <Box as="footer" textAlign="center" py={4} color="gray.500" fontSize="sm">
-        © 2025 by Stanley Luong
-      </Box>
-    </>
+            isLoadingMore={isLoadingMore}
+            hasMoreResults={hasMoreResults}
+          />
+        } />
+      </Routes>
+    </Router>
   );
 }
 

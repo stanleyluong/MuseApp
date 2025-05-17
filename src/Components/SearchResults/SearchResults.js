@@ -23,7 +23,7 @@ function getCellValue(track, key) {
     return track[key] || '';
 }
 
-function SearchResults({ searchResults, onAdd }) {
+function SearchResults({ searchResults, onAdd, tableId }) {
     const [sortBy, setSortBy] = useState('popularity');
     const [sortDir, setSortDir] = useState('desc');
 
@@ -67,7 +67,7 @@ function SearchResults({ searchResults, onAdd }) {
             </Heading>
             {sortedResults && sortedResults.length > 0 ? (
                 <Box overflowX="auto">
-                    <Table variant="simple" size="sm" bg="whiteAlpha.700" borderRadius="md" boxShadow="sm" minWidth="600px">
+                    <Table id={tableId} variant="simple" size="sm" bg="whiteAlpha.700" borderRadius="md" boxShadow="sm" minWidth="600px">
                         <Thead>
                             <Tr>
                                 {columns.map(col => (

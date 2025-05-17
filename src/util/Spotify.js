@@ -30,17 +30,17 @@ const Spotify = {
         const accessUrl = `https://accounts.spotify.com/authorize?client_id=${clientID}&response_type=token&scope=playlist-modify-public ugc-image-upload&redirect_uri=${redirectURI}&show_dialog=true`;
         window.location = accessUrl;
     },
-    async search(term) {
-        console.log('searching', term)
-        console.log(accessToken, 'access token')
+    async search(term, offset = 0, limit = 20) {
+        // console.log('searching', term)
+        // console.log(accessToken, 'access token')
         accessToken = Spotify.getAccessToken()
         try {
             const response = await axios.get(`https://api.spotify.com/v1/search`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
-                params: { type: 'track', q: term }
+                params: { type: 'track', q: term, offset, limit }
             });
             const jsonResponse = response.data;
-            console.log(jsonResponse.tracks.items)
+            // console.log(jsonResponse.tracks.items)
             if (!jsonResponse.tracks) {
                 return []
             }
